@@ -146,7 +146,7 @@ abstract class CM_Form_Abstract extends CM_View_Abstract {
       $isEmpty = true;
       if (array_key_exists($fieldName, $data)) {
         // get rid of broken UTF chars
-        $fieldValue = (string)$data[$fieldName];
+        $fieldValue = (string) $data[$fieldName];
         $fieldValue = mb_convert_encoding($fieldValue, 'UTF-8', 'UTF-8');
 
         if (!$field->isEmpty($fieldValue)) {
