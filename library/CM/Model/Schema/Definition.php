@@ -13,6 +13,13 @@ class CM_Model_Schema_Definition {
     }
 
     /**
+     * @return array
+     */
+    public function getFields() {
+        return $this->_schema;
+    }
+
+    /**
      * @param string $key
      * @param mixed  $value
      * @return mixed
