@@ -1,15 +1,18 @@
 <?php
 
-class CM_Service_ManagerTest extends CMTest_TestCase {
+class CM_Service_ManagerTest extends PHPUnit_Framework_TestCase {
+    use CM_ExceptionHandling_CatcherTrait;
 
     public function testHas() {
         $serviceManager = new CM_Service_Manager();
+        $this->assertFalse($serviceManager->has('foo'));
+        $this->assertTrue($serviceManager->has(CM_Service_Manager::class));
+        
         $serviceManager->register('foo', 'DummyService', array('foo' => 'bar'));
         $serviceManager->registerInstance('bar', 'my-service');
-
+  
         $this->assertTrue($serviceManager->has('foo'));
         $this->assertTrue($serviceManager->has('bar'));
-        $this->assertFalse($serviceManager->has('foobar'));
     }
 
     public function testGet() {
@@ -85,10 +88,9 @@ class CM_Service_ManagerTest extends CMTest_TestCase {
             $serviceManager->get('InvalidService');
         });
 
-        $this->assertInstanceOf('CM_Exception_Invalid', $exception);
+        $this->assertInstanceOf(\DI\NotFoundException::class, $exception);
         /** @var CM_Exception_Invalid $exception */
-        $this->assertSame('Service has no config.', $exception->getMessage());
-        $this->assertSame(['serviceName' => 'InvalidService'], $exception->getMetaInfo());
+        $this->assertSame("No entry or class found for 'InvalidService'", $exception->getMessage());
     }
 
     public function testMagicGet() {
@@ -98,20 +100,6 @@ class CM_Service_ManagerTest extends CMTest_TestCase {
         $service1 = $serviceManager->getDummyService();
         $service2 = $serviceManager->get('DummyService');
         $this->assertSame($service1, $service2);
-    }
-
-    public function testRegisterTwice() {
-        $serviceManager = new CM_Service_Manager();
-        $serviceManager->register('DummyService', 'DummyService', array('foo' => 'bar'));
-
-        $exception = $this->catchException(function () use ($serviceManager) {
-            $serviceManager->register('DummyService', 'DummyService', array('foo' => 'bar'));
-        });
-
-        $this->assertInstanceOf('CM_Exception_Invalid', $exception);
-        /** @var CM_Exception_Invalid $exception */
-        $this->assertSame('Service is already registered.', $exception->getMessage());
-        $this->assertSame(['service' => 'DummyService'], $exception->getMetaInfo());
     }
 
     public function testRegisterInstance() {
@@ -125,24 +113,6 @@ class CM_Service_ManagerTest extends CMTest_TestCase {
         $serviceManager->registerInstance('bar', $serviceBar);
         $this->assertSame($serviceBar, $serviceManager->get('bar'));
         $this->assertSame($serviceManager, $serviceBar->getServiceManager());
-
-        // register again
-        $serviceBar2 = new DummyService('bar2');
-        /** @var CM_Exception_Invalid $exception */
-        $exception = $this->catchException(function() use ($serviceManager, $serviceBar2) {
-            $serviceManager->registerInstance('bar', $serviceBar2);
-        });
-        $this->assertInstanceOf('CM_Exception_Invalid', $exception);
-        $this->assertSame(['service' => 'bar'], $exception->getMetaInfo());
-    }
-
-    public function testUnregister() {
-        $serviceManager = new CM_Service_Manager();
-        $serviceManager->registerInstance('foo', 12.3);
-        $this->assertSame(true, $serviceManager->has('foo'));
-
-        $serviceManager->unregister('foo');
-        $this->assertSame(false, $serviceManager->has('foo'));
     }
 
     public function testReplaceInstance() {
