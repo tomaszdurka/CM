@@ -308,4 +308,31 @@ return function (CM_Config_Node $config) {
             ],
         ]
     ];
+
+
+    $config->services['app-maintenance'] = [
+        'class'  => CM_Clockwork_Factory::class,
+        'method' => [
+            'name'      => 'createClockwork',
+            'arguments' => [
+                'clockworkClass' => CM_Maintenance_Clockwork::class,
+                'storageClass'   => CM_Clockwork_Storage_FileSystem::class,
+                'storageContext' => 'app-maintenance',
+            ],
+        ],
+    ];
+    
+    $config->services['app-maintenance-local'] = [
+        'class'  => CM_Clockwork_Factory::class,
+        'method' => [
+            'name'      => 'createClockwork',
+            'arguments' => [
+                'clockworkClass' => CM_Maintenance_Clockwork::class,
+                'storageClass'   => CM_Clockwork_Storage_FileSystem::class,
+                'storageContext' => 'app-maintenance-local',
+            ],
+        ],
+    ];
+    
+    $config->services['maintenance-tasks'] = new CM_Maintenance_TasksDefinition();
 };
